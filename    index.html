@@ -3,75 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CineFlicks 🎬</title>
+<title>CineFlicks 🎬 - Live</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#000;color:#fff;font-family:Arial,sans-serif;padding:20px}
-  h1{text-align:center;font-size:40px;margin:20px 0}
-  .search{text-align:center;margin:20px}
-  .search input{padding:12px 20px;width:80%;max-width:400px;border-radius:25px;border:none;font-size:16px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;margin-top:30px}
-  .card{background:#18181b;border-radius:12px;overflow:hidden;transition:.3s}
-  .card:hover{transform:scale(1.05)}
-  .card img{width:100%;height:230px;object-fit:cover}
-  .info{padding:10px}
-  .info h3{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rate{color:#facc15;margin-top:5px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:system-ui;padding:20px}
+h1{text-align:center;font-size:42px;margin:20px 0;background:linear-gradient(90deg,#ff0040,#ff8a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.search{display:flex;justify-content:center;margin:20px 0}
+.search input{padding:14px 24px;width:90%;max-width:500px;border-radius:30px;border:2px solid #333;background:#1a1a1a;color:#fff;font-size:16px;outline:none}
+.search input:focus{border-color:#ff0040}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px;margin-top:30px}
+.card{background:#1a1a1a;border-radius:16px;overflow:hidden;cursor:pointer;transition:.3s;border:1px solid #222}
+.card:hover{transform:translateY(-8px);border-color:#ff0040;box-shadow:0 10px 30px rgba(255,0,64,.3)}
+.card img{width:100%;height:240px;object-fit:cover}
+.info{padding:12px}
+.info h3{font-size:14px;height:32px;overflow:hidden}
+.rate{color:#facc15;font-size:13px;margin-top:6px;font-weight:bold}
+.badge{background:#ff0040;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;float:right}
 </style>
 </head>
 <body>
 <h1>CineFlicks 🎬</h1>
-<div class="search">
-  <input type="text" id="searchBox" placeholder="Search movies... (e.g. Avengers)" onkeyup="searchMovie()">
-</div>
-<div class="grid" id="movieGrid"></div>
-
+<div class="search"><input type="text" id="search" placeholder="Search any movie..." oninput="filterMovies()"></div>
+<div class="grid" id="grid"></div>
 <script>
-const API_KEY = '3e9575f4a6c7e49e2d3f4f8a6c5e9b1d'; // replace with your TMDB key or use demo
-const grid = document.getElementById('movieGrid');
-
-// Demo movies if no API key
-const demoMovies = [
-  {title:"Avengers Endgame",poster_path:"/or06FN3Dka5tukK1e9sl16pB3iy.jpg",vote_average:8.3},
-  {title:"Inception",poster_path:"/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",vote_average:8.4},
-  {title:"Interstellar",poster_path:"/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",vote_average:8.5},
-  {title:"Spider-Man No Way Home",poster_path:"/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",vote_average:8.1},
-  {title:"The Dark Knight",poster_path:"/qJ2tW6WMUDux911r6m7haRef0WH.jpg",vote_average:8.5},
-  {title:"Avatar 2",poster_path:"/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",vote_average:7.6},
+const movies=[
+{name:"Avengers: Endgame",year:2019,rate:8.4,img:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg"},
+{name:"Inception",year:2010,rate:8.8,img:"https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"},
+{name:"Interstellar",year:2014,rate:8.6,img:"https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"},
+{name:"Spider-Man: No Way Home",year:2021,rate:8.2,img:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg"},
+{name:"The Dark Knight",year:2008,rate:9.0,img:"https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"},
+{name:"Avatar: The Way of Water",year:2022,rate:7.6,img:"https://image.tmdb.org/t/p/w500/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg"},
+{name:"John Wick 4",year:2023,rate:7.8,img:"https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg"},
+{name:"Oppenheimer",year:2023,rate:8.3,img:"https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg"},
+{name:"Dune 2",year:2024,rate:8.5,img:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg"},
+{name:"Deadpool & Wolverine",year:2024,rate:8.0,img:"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfR.jpg"},
+{name:"Kalki 2898 AD",year:2024,rate:7.9,img:"https://image.tmdb.org/t/p/w500/kDp1vUBnMpe8ak4rjglPmnaAAW.jpg"},
+{name:"Leo",year:2023,rate:7.2,img:"https://image.tmdb.org/t/p/w500/p97UbE1Dq3FyA7P6B5yG5lR8J1.jpg"},
 ];
-
-function showMovies(movies){
-  grid.innerHTML = movies.map(m => `
-    <div class="card">
-      <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
-      <div class="info">
-        <h3>${m.title}</h3>
-        <div class="rate">⭐ ${m.vote_average?.toFixed(1) || 'N/A'}</div>
-      </div>
-    </div>
-  `).join('');
+const grid=document.getElementById('grid');
+function render(list){
+grid.innerHTML=list.map(m=>`
+<div class="card" onclick="alert('${m.name} - ${m.year}')">
+<img src="${m.img}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=${m.name}'">
+<div class="info"><span class="badge">${m.year}</span><h3>${m.name}</h3><div class="rate">⭐ ${m.rate}</div></div>
+</div>`).join('');
 }
-
-async function fetchMovies(query='popular'){
-  try{
-    let url = query==='popular' 
-      ? `https://api.themoviedb.org/3/movie/popular?api_key=8265bd1679663a7ea12ac168da84d2e8`
-      : `https://api.themoviedb.org/3/search/movie?api_key=8265bd1679663a7ea12ac168da84d2e8&query=${query}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    showMovies(data.results || demoMovies);
-  }catch(e){
-    showMovies(demoMovies);
-  }
+function filterMovies(){
+const q=document.getElementById('search').value.toLowerCase();
+render(movies.filter(m=>m.name.toLowerCase().includes(q)));
 }
-
-function searchMovie(){
-  const q = document.getElementById('searchBox').value;
-  if(q.length>2) fetchMovies(q);
-  else if(q.length===0) fetchMovies('popular');
+render(movies);
+// Try live API also
+fetch('https://api.themoviedb.org/3/movie/popular?api_key=8265bd1679663a7ea12ac168da84d2e8')
+.then(r=>r.json()).then(d=>{
+if(d.results) {
+ const apiMovies = d.results.slice(0,12).map(x=>({name:x.title,year:x.release_date?.slice(0,4)||2024,rate:x.vote_average,img:`https://image.tmdb.org/t/p/w500${x.poster_path}`}))
+ render(apiMovies);
 }
-
-fetchMovies('popular');
+}).catch(()=>{});
 </script>
 </body>
 </html>
