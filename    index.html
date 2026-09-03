@@ -12,79 +12,104 @@
 <div class="bg-white border-b sticky top-0 z-10">
 <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
 <div class="flex items-center gap-2">
-<span class="text-2xl">🎯</span><span class="font-bold text-xl">InternHunt</span><span class="text-xs bg-black text-white px-2 py-0.5 rounded-full">BETA</span>
+<span class="text-2xl">💼</span>
+<span class="font-bold text-xl">InternHunt</span>
+<span class="text-xs bg-black text-white px-2 py-0.5 rounded-full">BETA</span>
 </div>
 <div class="flex gap-2">
-<button onclick="exportData()" class="text-sm border px-3 py-1.5 rounded-lg">Export</button>
-<button onclick="document.getElementById('addModal').classList.remove('hidden')" class="text-sm bg-black text-white px-4 py-1.5 rounded-lg">+ Add Internship</button>
+<button onclick="exportData()" class="text-sm border px-3 py-1.5 rounded-lg hover:bg-gray-50">Export</button>
+<button onclick="openModal()" class="text-sm bg-black text-white px-4 py-1.5 rounded-lg hover:bg-gray-800">+ Add Internship</button>
 </div>
 </div>
 </div>
+
 <div class="max-w-6xl mx-auto px-4 py-6">
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-<div class="bg-white p-4 rounded-2xl border"><p class="text-sm text-gray-500">Applied</p><p id="sApplied" class="text-2xl font-bold">0</p></div>
-<div class="bg-white p-4 rounded-2xl border"><p class="text-sm text-gray-500">Interviews</p><p id="sInterview" class="text-2xl font-bold text-blue-600">0</p></div>
-<div class="bg-white p-4 rounded-2xl border"><p class="text-sm text-gray-500">Offers</p><p id="sOffer" class="text-2xl font-bold text-green-600">0</p></div>
-<div class="bg-white p-4 rounded-2xl border"><p class="text-sm text-gray-500">Success Rate</p><p id="sRate" class="text-2xl font-bold">0%</p></div>
+<!-- Stats -->
+<div class="grid grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Total</p><p id="statTotal" class="text-2xl font-bold">0</p></div>
+<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Applied</p><p id="statApplied" class="text-2xl font-bold text-blue-600">0</p></div>
+<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Interview</p><p id="statInterview" class="text-2xl font-bold text-yellow-600">0</p></div>
+<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Offer</p><p id="statOffer" class="text-2xl font-bold text-green-600">0</p></div>
 </div>
+
+<!-- Filters -->
 <div class="flex gap-2 mb-4 overflow-x-auto">
-<button onclick="filterStatus('All')" class="fBtn bg-black text-white px-4 py-1.5 rounded-full text-sm">All</button>
-<button onclick="filterStatus('Applied')" class="fBtn bg-white border px-4 py-1.5 rounded-full text-sm">Applied</button>
-<button onclick="filterStatus('Interview')" class="fBtn bg-white border px-4 py-1.5 rounded-full text-sm">Interview</button>
-<button onclick="filterStatus('Offer')" class="fBtn bg-white border px-4 py-1.5 rounded-full text-sm">Offer</button>
-<button onclick="filterStatus('Rejected')" class="fBtn bg-white border px-4 py-1.5 rounded-full text-sm">Rejected</button>
+<button onclick="filterStatus('all')" class="filter-btn active bg-black text-white px-3 py-1 rounded-full text-sm" data-f="all">All</button>
+<button onclick="filterStatus('Applied')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Applied">Applied</button>
+<button onclick="filterStatus('Interview')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Interview">Interview</button>
+<button onclick="filterStatus('Offer')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Offer">Offer</button>
+<button onclick="filterStatus('Rejected')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Rejected">Rejected</button>
 </div>
-<div id="list" class="grid md:grid-cols-2 gap-4"></div>
-<div id="empty" class="text-center py-20 bg-white rounded-2xl border border-dashed">
-<p class="text-4xl mb-2">📭</p><p class="font-semibold">No internships tracked yet</p><p class="text-sm text-gray-500">Add your first – Grow Your Skills Bangalore</p>
-<button onclick="document.getElementById('addModal').classList.remove('hidden')" class="mt-3 bg-black text-white px-4 py-2 rounded-lg text-sm">+ Add First</button>
+
+<!-- List -->
+<div id="internshipList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+<div id="emptyState" class="hidden text-center py-20 bg-white rounded-xl border"><p class="text-4xl mb-2">🔍</p><p class="font-semibold">No internships yet</p><p class="text-sm text-gray-500">Add your first application to get started</p></div>
 </div>
-</div>
-<div id="addModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-20">
-<div class="bg-white w-full max-w-md rounded-2xl p-6">
-<h3 class="font-bold text-lg mb-4">Add Internship</h3>
-<input id="company" placeholder="Company - e.g. Grow Your Skills" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
-<input id="role" placeholder="Role - e.g. Frontend Intern" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
+
+<!-- Modal -->
+<div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+<div class="bg-white rounded-xl w-full max-w-md p-5">
+<h3 id="modalTitle" class="font-bold text-lg mb-4">Add Internship</h3>
+<input id="company" placeholder="Company (ex: Google)" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
+<input id="role" placeholder="Role (ex: SDE Intern)" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
 <select id="status" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
 <option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option>
 </select>
 <input id="date" type="date" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
 <input id="link" placeholder="Job Link (optional)" class="w-full border rounded-lg px-3 py-2 mb-4 text-sm">
-<div class="flex gap-2">
-<button onclick="document.getElementById('addModal').classList.add('hidden')" class="flex-1 border py-2 rounded-lg text-sm">Cancel</button>
-<button onclick="addIntern()" class="flex-1 bg-black text-white py-2 rounded-lg text-sm">Save</button>
+<div class="flex gap-2 justify-end">
+<button onclick="closeModal()" class="px-4 py-2 text-sm border rounded-lg">Cancel</button>
+<button onclick="saveInternship()" class="px-4 py-2 text-sm bg-black text-white rounded-lg">Save</button>
 </div>
 </div>
 </div>
+
 <script>
-let data = JSON.parse(localStorage.getItem('internhunt_v1')||'[]');
-let curFilter='All';
-function save(){localStorage.setItem('internhunt_v1',JSON.stringify(data)); render();}
-function addIntern(){
- const c=document.getElementById('company').value.trim();
- const r=document.getElementById('role').value.trim();
- if(!c||!r) return alert('Add Company & Role');
- data.unshift({id:Date.now(),company:c,role:r,status:document.getElementById('status').value,date:document.getElementById('date').value||new Date().toISOString().split('T')[0],link:document.getElementById('link').value});
- document.getElementById('company').value='';document.getElementById('role').value='';document.getElementById('link').value='';
- document.getElementById('addModal').classList.add('hidden'); save();
-}
-function del(id){data=data.filter(x=>x.id!==id); save();}
-function updateStatus(id,val){let i=data.find(x=>x.id===id); if(i){i.status=val; save();}}
-function filterStatus(s){curFilter=s; render();}
+let internships = JSON.parse(localStorage.getItem('internhunt')||'[]');
+let currentFilter='all', editId=null;
+
 function render(){
- const list=document.getElementById('list'); list.innerHTML='';
- let filtered = curFilter==='All'?data:data.filter(x=>x.status===curFilter);
- document.getElementById('empty').style.display = filtered.length? 'none':'block';
- document.getElementById('sApplied').innerText=data.length;
- document.getElementById('sInterview').innerText=data.filter(x=>x.status==='Interview').length;
- document.getElementById('sOffer').innerText=data.filter(x=>x.status==='Offer').length;
- document.getElementById('sRate').innerText=data.length? Math.round((data.filter(x=>x.status==='Offer').length/data.length)*100)+'%':'0%';
- filtered.forEach(x=>{
-   let color = x.status==='Offer'?'bg-green-100 text-green-700': x.status==='Interview'?'bg-blue-100 text-blue-700': x.status==='Rejected'?'bg-red-100 text-red-700':'bg-gray-100 text-gray-700';
-   list.innerHTML+=`<div class="bg-white border rounded-2xl p-4"><div class="flex justify-between items-start"><div><p class="font-bold">${x.company}</p><p class="text-sm text-gray-600">${x.role}</p><p class="text-xs text-gray-400 mt-1">${x.date}</p></div><span class="text-xs px-2 py-1 rounded-full ${color}">${x.status}</span></div><div class="flex gap-2 mt-3"><select onchange="updateStatus(${x.id},this.value)" class="text-xs border rounded-lg px-2 py-1"><option ${x.status==='Applied'?'selected':''}>Applied</option><option ${x.status==='Interview'?'selected':''}>Interview</option><option ${x.status==='Offer'?'selected':''}>Offer</option><option ${x.status==='Rejected'?'selected':''}>Rejected</option></select>${x.link?`<a href="${x.link}" target="_blank" class="text-xs border px-2 py-1 rounded-lg">Link</a>`:''}<button onclick="del(${x.id})" class="ml-auto text-xs text-red-500">Delete</button></div></div>`;
- });
+  const list=document.getElementById('internshipList');
+  const empty=document.getElementById('emptyState');
+  let filtered = currentFilter==='all' ? internships : internships.filter(i=>i.status===currentFilter);
+  
+  document.getElementById('statTotal').innerText=internships.length;
+  document.getElementById('statApplied').innerText=internships.filter(i=>i.status==='Applied').length;
+  document.getElementById('statInterview').innerText=internships.filter(i=>i.status==='Interview').length;
+  document.getElementById('statOffer').innerText=internships.filter(i=>i.status==='Offer').length;
+
+  if(filtered.length===0){ list.innerHTML=''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  list.innerHTML=filtered.map(i=>`
+    <div class="bg-white border rounded-xl p-4 hover:shadow-sm">
+      <div class="flex justify-between"><h4 class="font-bold">${i.company}</h4><span class="text-xs px-2 py-0.5 rounded-full border ${i.status==='Offer'?'bg-green-50 text-green-700':i.status==='Interview'?'bg-yellow-50 text-yellow-700':i.status==='Rejected'?'bg-red-50 text-red-700':'bg-blue-50 text-blue-700'}">${i.status}</span></div>
+      <p class="text-sm text-gray-600 mt-1">${i.role}</p>
+      <p class="text-xs text-gray-400 mt-2">${i.date||''}</p>
+      <div class="flex gap-2 mt-3">
+        ${i.link?`<a href="${i.link}" target="_blank" class="text-xs text-blue-600 border px-2 py-1 rounded">Link</a>`:''}
+        <button onclick="editItem('${i.id}')" class="text-xs border px-2 py-1 rounded">Edit</button>
+        <button onclick="deleteItem('${i.id}')" class="text-xs border px-2 py-1 rounded text-red-600">Delete</button>
+      </div>
+    </div>
+  `).join('');
 }
-function exportData(){let csv="Company,Role,Status,Date,Link\n"+data.map(x=>`"${x.company}","${x.role}","${x.status}","${x.date}","${x.link}"`).join("\n"); let blob=new Blob([csv],{type:'text/csv'}); let a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='internhunt.csv'; a.click();}
+
+function openModal(){ document.getElementById('modal').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('modal').classList.add('hidden'); editId=null; document.getElementById('modalTitle').innerText='Add Internship'; ['company','role','link'].forEach(id=>document.getElementById(id).value=''); }
+
+function saveInternship(){
+  const company=document.getElementById('company').value.trim();
+  const role=document.getElementById('role').value.trim();
+  if(!company||!role) return alert('Add company & role');
+  const data={ id:editId||Date.now().toString(), company, role, status:document.getElementById('status').value, date:document.getElementById('date').value, link:document.getElementById('link').value };
+  if(editId){ const idx=internships.findIndex(i=>i.id===editId); internships[idx]=data; } else internships.unshift(data);
+  localStorage.setItem('internhunt',JSON.stringify(internships)); closeModal(); render();
+}
+function deleteItem(id){ if(confirm('Delete?')){ internships=internships.filter(i=>i.id!==id); localStorage.setItem('internhunt',JSON.stringify(internships)); render(); } }
+function editItem(id){ const i=internships.find(x=>x.id===id); editId=id; document.getElementById('company').value=i.company; document.getElementById('role').value=i.role; document.getElementById('status').value=i.status; document.getElementById('date').value=i.date; document.getElementById('link').value=i.link; document.getElementById('modalTitle').innerText='Edit Internship'; openModal(); }
+function filterStatus(s){ currentFilter=s; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('bg-black','text-white','active')); document.querySelector(`[data-f="${s}"]`).classList.add('bg-black','text-white'); render(); }
+function exportData(){ const blob=new Blob([JSON.stringify(internships,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='internhunt.json'; a.click(); }
+
 render();
 </script>
 </body>
