@@ -3,114 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InternHunt - Track Your Internships</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>body{font-family:'Inter',sans-serif}</style>
+<title>CineFlicks 🎬</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#000;color:#fff;font-family:Arial,sans-serif;padding:20px}
+  h1{text-align:center;font-size:40px;margin:20px 0}
+  .search{text-align:center;margin:20px}
+  .search input{padding:12px 20px;width:80%;max-width:400px;border-radius:25px;border:none;font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;margin-top:30px}
+  .card{background:#18181b;border-radius:12px;overflow:hidden;transition:.3s}
+  .card:hover{transform:scale(1.05)}
+  .card img{width:100%;height:230px;object-fit:cover}
+  .info{padding:10px}
+  .info h3{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rate{color:#facc15;margin-top:5px}
+</style>
 </head>
-<body class="bg-[#f6f7fb] min-h-screen">
-<div class="bg-white border-b sticky top-0 z-10">
-<div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-<div class="flex items-center gap-2">
-<span class="text-2xl">💼</span>
-<span class="font-bold text-xl">InternHunt</span>
-<span class="text-xs bg-black text-white px-2 py-0.5 rounded-full">BETA</span>
+<body>
+<h1>CineFlicks 🎬</h1>
+<div class="search">
+  <input type="text" id="searchBox" placeholder="Search movies... (e.g. Avengers)" onkeyup="searchMovie()">
 </div>
-<div class="flex gap-2">
-<button onclick="exportData()" class="text-sm border px-3 py-1.5 rounded-lg hover:bg-gray-50">Export</button>
-<button onclick="openModal()" class="text-sm bg-black text-white px-4 py-1.5 rounded-lg hover:bg-gray-800">+ Add Internship</button>
-</div>
-</div>
-</div>
-
-<div class="max-w-6xl mx-auto px-4 py-6">
-<!-- Stats -->
-<div class="grid grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Total</p><p id="statTotal" class="text-2xl font-bold">0</p></div>
-<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Applied</p><p id="statApplied" class="text-2xl font-bold text-blue-600">0</p></div>
-<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Interview</p><p id="statInterview" class="text-2xl font-bold text-yellow-600">0</p></div>
-<div class="bg-white p-4 rounded-xl border"><p class="text-xs text-gray-500">Offer</p><p id="statOffer" class="text-2xl font-bold text-green-600">0</p></div>
-</div>
-
-<!-- Filters -->
-<div class="flex gap-2 mb-4 overflow-x-auto">
-<button onclick="filterStatus('all')" class="filter-btn active bg-black text-white px-3 py-1 rounded-full text-sm" data-f="all">All</button>
-<button onclick="filterStatus('Applied')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Applied">Applied</button>
-<button onclick="filterStatus('Interview')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Interview">Interview</button>
-<button onclick="filterStatus('Offer')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Offer">Offer</button>
-<button onclick="filterStatus('Rejected')" class="filter-btn border bg-white px-3 py-1 rounded-full text-sm" data-f="Rejected">Rejected</button>
-</div>
-
-<!-- List -->
-<div id="internshipList" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-<div id="emptyState" class="hidden text-center py-20 bg-white rounded-xl border"><p class="text-4xl mb-2">🔍</p><p class="font-semibold">No internships yet</p><p class="text-sm text-gray-500">Add your first application to get started</p></div>
-</div>
-
-<!-- Modal -->
-<div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-<div class="bg-white rounded-xl w-full max-w-md p-5">
-<h3 id="modalTitle" class="font-bold text-lg mb-4">Add Internship</h3>
-<input id="company" placeholder="Company (ex: Google)" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
-<input id="role" placeholder="Role (ex: SDE Intern)" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
-<select id="status" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
-<option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option>
-</select>
-<input id="date" type="date" class="w-full border rounded-lg px-3 py-2 mb-3 text-sm">
-<input id="link" placeholder="Job Link (optional)" class="w-full border rounded-lg px-3 py-2 mb-4 text-sm">
-<div class="flex gap-2 justify-end">
-<button onclick="closeModal()" class="px-4 py-2 text-sm border rounded-lg">Cancel</button>
-<button onclick="saveInternship()" class="px-4 py-2 text-sm bg-black text-white rounded-lg">Save</button>
-</div>
-</div>
-</div>
+<div class="grid" id="movieGrid"></div>
 
 <script>
-let internships = JSON.parse(localStorage.getItem('internhunt')||'[]');
-let currentFilter='all', editId=null;
+const API_KEY = '3e9575f4a6c7e49e2d3f4f8a6c5e9b1d'; // replace with your TMDB key or use demo
+const grid = document.getElementById('movieGrid');
 
-function render(){
-  const list=document.getElementById('internshipList');
-  const empty=document.getElementById('emptyState');
-  let filtered = currentFilter==='all' ? internships : internships.filter(i=>i.status===currentFilter);
-  
-  document.getElementById('statTotal').innerText=internships.length;
-  document.getElementById('statApplied').innerText=internships.filter(i=>i.status==='Applied').length;
-  document.getElementById('statInterview').innerText=internships.filter(i=>i.status==='Interview').length;
-  document.getElementById('statOffer').innerText=internships.filter(i=>i.status==='Offer').length;
+// Demo movies if no API key
+const demoMovies = [
+  {title:"Avengers Endgame",poster_path:"/or06FN3Dka5tukK1e9sl16pB3iy.jpg",vote_average:8.3},
+  {title:"Inception",poster_path:"/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",vote_average:8.4},
+  {title:"Interstellar",poster_path:"/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",vote_average:8.5},
+  {title:"Spider-Man No Way Home",poster_path:"/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",vote_average:8.1},
+  {title:"The Dark Knight",poster_path:"/qJ2tW6WMUDux911r6m7haRef0WH.jpg",vote_average:8.5},
+  {title:"Avatar 2",poster_path:"/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",vote_average:7.6},
+];
 
-  if(filtered.length===0){ list.innerHTML=''; empty.classList.remove('hidden'); return; }
-  empty.classList.add('hidden');
-  list.innerHTML=filtered.map(i=>`
-    <div class="bg-white border rounded-xl p-4 hover:shadow-sm">
-      <div class="flex justify-between"><h4 class="font-bold">${i.company}</h4><span class="text-xs px-2 py-0.5 rounded-full border ${i.status==='Offer'?'bg-green-50 text-green-700':i.status==='Interview'?'bg-yellow-50 text-yellow-700':i.status==='Rejected'?'bg-red-50 text-red-700':'bg-blue-50 text-blue-700'}">${i.status}</span></div>
-      <p class="text-sm text-gray-600 mt-1">${i.role}</p>
-      <p class="text-xs text-gray-400 mt-2">${i.date||''}</p>
-      <div class="flex gap-2 mt-3">
-        ${i.link?`<a href="${i.link}" target="_blank" class="text-xs text-blue-600 border px-2 py-1 rounded">Link</a>`:''}
-        <button onclick="editItem('${i.id}')" class="text-xs border px-2 py-1 rounded">Edit</button>
-        <button onclick="deleteItem('${i.id}')" class="text-xs border px-2 py-1 rounded text-red-600">Delete</button>
+function showMovies(movies){
+  grid.innerHTML = movies.map(m => `
+    <div class="card">
+      <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+      <div class="info">
+        <h3>${m.title}</h3>
+        <div class="rate">⭐ ${m.vote_average?.toFixed(1) || 'N/A'}</div>
       </div>
     </div>
   `).join('');
 }
 
-function openModal(){ document.getElementById('modal').classList.remove('hidden'); }
-function closeModal(){ document.getElementById('modal').classList.add('hidden'); editId=null; document.getElementById('modalTitle').innerText='Add Internship'; ['company','role','link'].forEach(id=>document.getElementById(id).value=''); }
-
-function saveInternship(){
-  const company=document.getElementById('company').value.trim();
-  const role=document.getElementById('role').value.trim();
-  if(!company||!role) return alert('Add company & role');
-  const data={ id:editId||Date.now().toString(), company, role, status:document.getElementById('status').value, date:document.getElementById('date').value, link:document.getElementById('link').value };
-  if(editId){ const idx=internships.findIndex(i=>i.id===editId); internships[idx]=data; } else internships.unshift(data);
-  localStorage.setItem('internhunt',JSON.stringify(internships)); closeModal(); render();
+async function fetchMovies(query='popular'){
+  try{
+    let url = query==='popular' 
+      ? `https://api.themoviedb.org/3/movie/popular?api_key=8265bd1679663a7ea12ac168da84d2e8`
+      : `https://api.themoviedb.org/3/search/movie?api_key=8265bd1679663a7ea12ac168da84d2e8&query=${query}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    showMovies(data.results || demoMovies);
+  }catch(e){
+    showMovies(demoMovies);
+  }
 }
-function deleteItem(id){ if(confirm('Delete?')){ internships=internships.filter(i=>i.id!==id); localStorage.setItem('internhunt',JSON.stringify(internships)); render(); } }
-function editItem(id){ const i=internships.find(x=>x.id===id); editId=id; document.getElementById('company').value=i.company; document.getElementById('role').value=i.role; document.getElementById('status').value=i.status; document.getElementById('date').value=i.date; document.getElementById('link').value=i.link; document.getElementById('modalTitle').innerText='Edit Internship'; openModal(); }
-function filterStatus(s){ currentFilter=s; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('bg-black','text-white','active')); document.querySelector(`[data-f="${s}"]`).classList.add('bg-black','text-white'); render(); }
-function exportData(){ const blob=new Blob([JSON.stringify(internships,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='internhunt.json'; a.click(); }
 
-render();
+function searchMovie(){
+  const q = document.getElementById('searchBox').value;
+  if(q.length>2) fetchMovies(q);
+  else if(q.length===0) fetchMovies('popular');
+}
+
+fetchMovies('popular');
 </script>
 </body>
 </html>
